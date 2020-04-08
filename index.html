@@ -17,14 +17,55 @@
 <script>
 
 class Point {
-    constructor(x,y) {
+    constructor(x,y,fixed=false) {
         this.x = x;
         this.y = y;
+        this.fixed = false;
         this.id = this.x + "_" + this.y;
     }
 }
 
-var pointMemory = [[0,-1],[0.866,-0.5],[0.866,0.5],[0,1],[-0.866,0.5],[-0.866,-0.5], [0,0]].map(p => new Point(p[0], p[1]));
+class Area {
+    constructor(points) {
+
+    }
+}
+
+class Tile {
+    constructor(areas) {
+        this.areas = areas;
+    }
+}
+
+class HexagonFactory {
+    static make(radius = 1)
+    {
+        let points = [];
+        for(let i = 0; i<6; i++) {
+            points.push([
+                Math.cos(i* Math.PI/3),
+                Math.sin(i* Math.PI/3),
+            ])
+        }
+        return points;
+    }
+}
+
+class SegmentFactory {
+    static make(position, length, radius = 1)
+    {
+        let points = [];
+        for(let i = position; i<=position+length; i++) {
+            points.push([
+                Math.cos(i* Math.PI/3),
+                Math.sin(i* Math.PI/3),
+            ])
+        }
+        return points;
+    }
+}
+
+var pointMemory = HexagonFactory.make().map(p => new Point(p[0], p[1]));
 
 function points()
 {
@@ -33,7 +74,7 @@ function points()
 
 var delaunay = Delaunator.from(points());
 
-console.log(delaunay);
+
 
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -85,10 +126,6 @@ canvas.onclick = function (e) {
     p.x = (e.layerX - padding) / ratio + minX
     p.y = (e.layerY - padding) / ratio + minY
 
-    // pointMemory.push(new Point(
-    //     (e.layerX - padding) / ratio + minX,
-    //     (e.layerY - padding) / ratio + minY
-    // ));
     delaunay = Delaunator.from(points());
     updated = true;
 }
@@ -104,8 +141,6 @@ function frame() {
     requestAnimationFrame(frame);
     draw();
 }
-
-frame();
 
 function draw() {
     if (!updated) return;
@@ -147,6 +182,9 @@ function draw() {
     }
     ctx.fill();
 }
+
+// MAIN
+frame();
 
 </script>
 
